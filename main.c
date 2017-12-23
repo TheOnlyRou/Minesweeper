@@ -32,8 +32,12 @@ typedef struct
 {
     int Difficulty;
     char Name[50];
+    int Moves;
     Time TimeTaken;
     Date SaveDate;
+    char Gboard[14][14];
+    int Mboard[14][14];
+    int Nboard[14][14];
 }SavedGame;
 
 
@@ -41,6 +45,7 @@ typedef struct
 SYSTEMTIME DateTime;
 char GameBoard[14][14];
 int MinesBoard[14][14];
+int NumberBoard[14][14]
 Player PlayersArray[100];
 SavedGame SavedGames[100];
 int LastPlayer=0,LastGame=0,Difficulty,Lose=0,Win=0;
@@ -69,40 +74,68 @@ void center(const char *s, int width)
     }
 }
 
-void ShowAdjMines(int row, int col)
+int checkemptycell(int row,int col){
+    if(MinesBoard[row][col]!=1&&MinesBoard[row+1][col]!=1&&MinesBoard[row+1][col+1]!=1&&MinesBoard[row+1][col-1]!=1&&MinesBoard[row][col+1]!=1&&MinesBoard[row][col-1]!=1&&MinesBoard[row-1][col]!=1&&MinesBoard[row-1][col+1]!=1&&MinesBoard[row-1][col-1]!=1){
+        return 1;
+    }
+    else
+        return 0;
+}
+void ShowAdjEmpty(int row, int col)
 {
+    int check=0,i;
+    if(NumberBoard[row][col]==0)
+    GameBoard[i][j]='-';
+    GameBoard[i+1][j]='-';
+    GameBoard[i][j+1]='-';
+    GameBoard[i-1][j]='-';
+    GameBoard[i][j-1]='-';
+    GameBoard[i+1][j+1]='-';
+    GameBoard[i-1][j+1]='-';
+    GameBoard[i-1][j-1]='-';
+    GameBoard[i+1][j-1]='-';
     
 }
 
 void QuickMaffs(int row, int col)
 {
-    AdjMines=0;
     if(MinesBoard[row][col]==1)
         Lose=1;
-    if(MinesBoard[row+1][col]==1)
-        AdjMines++;
-    if(MinesBoard[row][col+1]==1)
-        AdjMines++;  
-    if(MinesBoard[row-1][col]==1)
-        AdjMines++;
-    if(MinesBoard[row][col-1]==1)
-        AdjMines++;
-    if(MinesBoard[row+1][col+1]==1)
-        AdjMines++;
-    if(MinesBoard[row+1][col-1]==1)
-        AdjMines++;
-    if(MinesBoard[row-1][col+1]==1)
-        AdjMines++;
-    if(MinesBoard[row-1][col-1]==1)
-        AdjMines++;
-        
     if(AdjMines==0)
-        ShowAdjMines(row,col);
+        ShowAdjEmpty(row,col);
     else
         GameBoard[row][col]=AdjMines;
 }
 
-void CreateMines();
+void NumberBoardBuild()
+{
+    int i=0,j=0,AdjMines=0;
+    for(i=0;i<14;i++)
+    {
+        for(j=0;j<14;j++)
+        {
+        if(MinesBoard[i+1][j]==1)
+            AdjMines++;
+        if(MinesBoard[i][j+1]==1)
+            AdjMines++;  
+        if(MinesBoard[i-1][j]==1)
+            AdjMines++;
+        if(MinesBoard[i][j-1]==1)
+            AdjMines++;
+        if(MinesBoard[i+1][j+1]==1)
+            AdjMines++;
+        if(MinesBoard[i+1][j-1]==1)
+            AdjMines++;
+        if(MinesBoard[i-1][j+1]==1)
+            AdjMines++;
+        if(MinesBoard[i-1][j-1]==1)
+            AdjMines++;            
+        NumberBoard[i][j]=AdjMines;
+        }
+    }
+}
+
+void CreateMines()
 {
     int i,j,Mines,MineFactor,randrow,randcol;
     if(Difficulty==1)
@@ -407,16 +440,37 @@ void SetupGame()
     CreatePlayer();
     ChooseDifficulty();
     MinesBoardBuild();
+    NumberBoardBuild();
     BoardBuild();
     Start();
     MainMenu();
 }
 void LoadGame()
 {
-    int i=0;
+    int i=0,j=0,choice;
     printf("# \t Player Name \t Date ");
     for(i=0;i<LastGame-1;i++)
     printf("%d\t %-20s \t %d/%d/%d\n",i+1,SavedGames[i].Name,SavedGames[i].SaveDate.Day,SavedGames[i].SaveDate.Month,SavedGames[i].SaveDate.Year);
+    printf("\n\n");
+    printf("Please select one of the saved games above by entering its #:");
+    do{
+        scanf("%d",choice);
+        if(CheckInt(choice)==0)
+            printf("Please enter an integer that corresponds to your action of choice!");
+        if(choice>LastGame-1 || choice<1)
+            printf("Please enter one of the integers above that corresponds to your action of choice!");
+    }while(CheckInt(choice)==0 || choice>LastGame-1 || choice<1)
+    Difficulty=SavedGames[choice-1].Difficulty;
+    for(i=0;i<14;i++)
+    {
+        for(j=0;j<14;j++)
+        {
+            GameBoard[i][j]=SavedGames.Gboard[i][j];
+            MinesBoard[i][j]=SavedGames.Mboard[i][j];
+            NumberBoard[i][j]=SavedGames.Nboard[i][j];
+        }
+    }
+    Start();
     printf("\n\nPress Any Key to Continue\n");
     getch();
 }
@@ -526,7 +580,7 @@ int main()
     {
         while(flag==0)
         {
-        fscanf(j,"%d,%[^,],%d,%d,%d,%d,%d,%d\n",&SavedGames[c2].Difficulty,SavedGames[c2].Name,&SavedGames[c2].TimeTaken.Hours,&SavedGames[c2].TimeTaken.Minutes,&SavedGames[c2].TimeTaken.Seconds,&SavedGames[c2].SaveDate.Day,&SavedGames[c2].SaveDate.Month,&SavedGames[c2].SaveDate.Year);
+        fscanf(j,"%d,%[^,],%d,%d,%d,%d,%d,%d\n",&SavedGames[c2].Difficulty,SavedGames[c2].Name,&SavedGames[c2].TimeTaken.Hours,&SavedGames[c2].TimeTaken.Minutes,&SavedGames[c2].TimeTaken.Seconds,&SavedGames[c2].SaveDate.Day,&SavedGames[c2].SaveDate.Month,&SavedGames[c2].SaveDate.Year,&SavedGames[c2].Moves);
         if(SavedGames[c2].Difficulty==0)
             flag=1;
         else
@@ -536,29 +590,33 @@ int main()
                 case 1:
                     for(i=0;i<8;i++)
                     {
-                            fscanf(j,"%c %c %c %c %c %c %c %c\n",GameBoard[i][0],GameBoard[i][1],GameBoard[i][2],GameBoard[i][3],GameBoard[i][4],GameBoard[i][5],GameBoard[i][6],GameBoard[i][7]);
-                            fscanf(j,"%d %d %d %d %d %d %d %d\n",&MinesBoard[i][0],&MinesBoard[i][1],&MinesBoard[i][2],&MinesBoard[i][3],&MinesBoard[i][4],&MinesBoard[i][5],&MinesBoard[i][6],&MinesBoard[i][7]);
+                            fscanf(j,"%c %c %c %c %c %c %c %c\n",SavedGames[c2].Gboard[i][0],SavedGames[c2].Gboard[i][1],SavedGames[c2].Gboard[i][2],SavedGames[c2].Gboard[i][3],SavedGames[c2].Gboard[i][4],SavedGames[c2].Gboard[i][5],SavedGames[c2].Gboard[i][6],SavedGames[c2].Gboard[i][7]);
+                            fscanf(j,"%d %d %d %d %d %d %d %d\n",&SavedGames[c2].Mboard[i][0],&SavedGames[c2].Mboard[i][1],&SavedGames[c2].Mboard[i][2],&SavedGames[c2].Mboard[i][3],&SavedGames[c2].Mboard[i][4],&SavedGames[c2].Mboard[i][5],&SavedGames[c2].Mboard[i][6],&SavedGames[c2].Mboard[i][7]);
+                            fscanf(j,"%d %d %d %d %d %d %d %d\n",&SavedGames[c2].Nboard[i][0],&SavedGames[c2].Nboard[i][1],&SavedGames[c2].Nboard[i][2],&SavedGames[c2].Nboard[i][3],&SavedGames[c2].Nboard[i][4],&SavedGames[c2].Nboard[i][5],&SavedGames[c2].Nboard[i][6],&SavedGames[c2].Nboard[i][7]);
                     }
                     break;
                 case 2:
                     for(i=0;i<10;i++)
                     {
-                            fscanf(j,"%c %c %c %c %c %c %c %c %c %c\n",GameBoard[i][0],GameBoard[i][1],GameBoard[i][2],GameBoard[i][3],GameBoard[i][4],GameBoard[i][5],GameBoard[i][6],GameBoard[i][7],GameBoard[i][8],GameBoard[i][9]);
-                            fscanf(j,"%d %d %d %d %d %d %d %d %d %d\n",&MinesBoard[i][0],&MinesBoard[i][1],&MinesBoard[i][2],&MinesBoard[i][3],&MinesBoard[i][4],&MinesBoard[i][5],&MinesBoard[i][6],&MinesBoard[i][7],&MinesBoard[i][8],&MinesBoard[i][9]);
+                            fscanf(j,"%c %c %c %c %c %c %c %c %c %c\n",SavedGames[c2].Gboard[i][0],SavedGames[c2].Gboard[i][1],SavedGames[c2].Gboard[i][2],SavedGames[c2].Gboard[i][3],SavedGames[c2].Gboard[i][4],SavedGames[c2].Gboard[i][5],SavedGames[c2].Gboard[i][6],SavedGames[c2].Gboard[i][7],SavedGames[c2].Gboard[i][8],SavedGames[c2].Gboard[i][9]);
+                            fscanf(j,"%d %d %d %d %d %d %d %d %d %d\n",&SavedGames[c2].Mboard[i][0],&SavedGames[c2].Mboard[i][1],&SavedGames[c2].Mboard[i][2],&SavedGames[c2].Mboard[i][3],&SavedGames[c2].Mboard[i][4],&SavedGames[c2].Mboard[i][5],&SavedGames[c2].Mboard[i][6],&SavedGames[c2].Mboard[i][7],&SavedGames[c2].Mboard[i][8],&SavedGames[c2].Mboard[i][9]);
+                            fscanf(j,"%d %d %d %d %d %d %d %d %d %d\n",&SavedGames[c2].Nboard[i][0],&SavedGames[c2].Nboard[i][1],&SavedGames[c2].Nboard[i][2],&SavedGames[c2].Nboard[i][3],&SavedGames[c2].Nboard[i][4],&SavedGames[c2].Nboard[i][5],&SavedGames[c2].Nboard[i][6],&SavedGames[c2].Nboard[i][7],&SavedGames[c2].Nboard[i][8],&SavedGames[c2].Nboard[i][9]);
                     }
                     break;
                 case 3:
                     for(i=0;i<12;i++)
                     {
-                            fscanf(j,"%c %c %c %c %c %c %c %c %c %c %c %c\n",GameBoard[i][0],GameBoard[i][1],GameBoard[i][2],GameBoard[i][3],GameBoard[i][4],GameBoard[i][5],GameBoard[i][6],GameBoard[i][7],GameBoard[i][8],GameBoard[i][9],GameBoard[i][10],GameBoard[i][11]);
-                            fscanf(j,"%d %d %d %d %d %d %d %d %d %d %d %d\n",&MinesBoard[i][0],&MinesBoard[i][1],&MinesBoard[i][2],&MinesBoard[i][3],&MinesBoard[i][4],&MinesBoard[i][5],&MinesBoard[i][6],&MinesBoard[i][7],&MinesBoard[i][8],&MinesBoard[i][9],&MinesBoard[i][10],&MinesBoard[i][11]);
-                    }
+                            fscanf(j,"%c %c %c %c %c %c %c %c %c %c %c %c\n",SavedGames[c2].Gboard[i][0],SavedGames[c2].Gboard[i][1],SavedGames[c2].Gboard[i][2],SavedGames[c2].Gboard[i][3],SavedGames[c2].Gboard[i][4],SavedGames[c2].Gboard[i][5],SavedGames[c2].Gboard[i][6],SavedGames[c2].Gboard[i][7],SavedGames[c2].Gboard[i][8],SavedGames[c2].Gboard[i][9],SavedGames[c2].Gboard[i][10],SavedGames[c2].Gboard[i][11]);
+                            fscanf(j,"%d %d %d %d %d %d %d %d %d %d %d %d\n",&SavedGames[c2].Mboard[i][0],&SavedGames[c2].Mboard[i][1],&SavedGames[c2].Mboard[i][2],&SavedGames[c2].Mboard[i][3],&SavedGames[c2].Mboard[i][4],&SavedGames[c2].Mboard[i][5],&SavedGames[c2].Mboard[i][6],&SavedGames[c2].Mboard[i][7],&SavedGames[c2].Mboard[i][8],&SavedGames[c2].Mboard[i][9],&SavedGames[c2].Mboard[i][10],&SavedGames[c2].Mboard[i][11]);
+                            fscanf(j,"%d %d %d %d %d %d %d %d %d %d %d %d\n",&SavedGames[c2].Nboard[i][0],&SavedGames[c2].Nboard[i][1],&SavedGames[c2].Nboard[i][2],&SavedGames[c2].Nboard[i][3],&SavedGames[c2].Nboard[i][4],&SavedGames[c2].Nboard[i][5],&SavedGames[c2].Nboard[i][6],&SavedGames[c2].Nboard[i][7],&SavedGames[c2].Nboard[i][8],&SavedGames[c2].Nboard[i][9],&SavedGames[c2].Nboard[i][10],&SavedGames[c2].Nboard[i][11]);
+                    }Mboard
                     break;
                 case 4:
                     for(i=0;i<14;i++)
                     {
-                            fscanf(j,"%c %c %c %c %c %c %c %c %c %c %c %c\n",GameBoard[i][0],GameBoard[i][1],GameBoard[i][2],GameBoard[i][3],GameBoard[i][4],GameBoard[i][5],GameBoard[i][6],GameBoard[i][7],GameBoard[i][8],GameBoard[i][9],GameBoard[i][10],GameBoard[i][11],GameBoard[i][12],GameBoard[i][13]);
-                            fscanf(j,"%d %d %d %d %d %d %d %d %d %d %d %d\n",&MinesBoard[i][0],&MinesBoard[i][1],&MinesBoard[i][2],&MinesBoard[i][3],&MinesBoard[i][4],&MinesBoard[i][5],&MinesBoard[i][6],&MinesBoard[i][7],&MinesBoard[i][8],&MinesBoard[i][9],&MinesBoard[i][10],&MinesBoard[i][11],&MinesBoard[i][12],&MinesBoard[i][13]);
+                            fscanf(j,"%c %c %c %c %c %c %c %c %c %c %c %c\n",SavedGames[c2].Gboard[i][0],SavedGames[c2].Gboard[i][1],SavedGames[c2].Gboard[i][2],SavedGames[c2].Gboard[i][3],SavedGames[c2].Gboard[i][4],SavedGames[c2].Gboard[i][5],SavedGames[c2].Gboard[i][6],SavedGames[c2].Gboard[i][7],SavedGames[c2].Gboard[i][8],SavedGames[c2].Gboard[i][9],SavedGames[c2].Gboard[i][10],SavedGames[c2].Gboard[i][11],SavedGames[c2].Gboard[i][12],SavedGames[c2].Gboard[i][13]);
+                            fscanf(j,"%d %d %d %d %d %d %d %d %d %d %d %d\n",&SavedGames[c2].Mboard[i][0],&SavedGames[c2].Mboard[i][1],&SavedGames[c2].Mboard[i][2],&SavedGames[c2].Mboard[i][3],&SavedGames[c2].Mboard[i][4],&SavedGames[c2].Mboard[i][5],&SavedGames[c2].Mboard[i][6],&SavedGames[c2].Mboard[i][7],&SavedGames[c2].Mboard[i][8],&SavedGames[c2].Mboard[i][9],&SavedGames[c2].Mboard[i][10],&SavedGames[c2].Mboard[i][11],&SavedGames[c2].Mboard[i][12],&SavedGames[c2].Mboard[i][13]);
+                            fscanf(j,"%d %d %d %d %d %d %d %d %d %d %d %d\n",&SavedGames[c2].Nboard[i][0],&SavedGames[c2].Nboard[i][1],&SavedGames[c2].Nboard[i][2],&SavedGames[c2].Nboard[i][3],&SavedGames[c2].Nboard[i][4],&SavedGames[c2].Nboard[i][5],&SavedGames[c2].Nboard[i][6],&SavedGames[c2].Nboard[i][7],&SavedGames[c2].Nboard[i][8],&SavedGames[c2].Nboard[i][9],&SavedGames[c2].Nboard[i][10],&SavedGames[c2].Nboard[i][11],&SavedGames[c2].Nboard[i][12],&SavedGames[c2].Nboard[i][13]);
                     }
                     break;
             }
