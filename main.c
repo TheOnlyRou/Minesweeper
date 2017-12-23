@@ -342,7 +342,8 @@ void Start()
 {
     system("cls");
     SavedGame New;
-    int Moves=0,choice,openrow,opencol,Flags=0,QMarks=0;
+    int Moves=0,choice,openrow,opencol,markrow,markcol,Flags=0,QMarks=0;
+    char YesNo;
     clock_t StartTimer,EndTimer;
     double TimePassed,TimeTaken;
     GetSystemTime(&DateTime);
@@ -373,7 +374,29 @@ void Start()
                     if(Moves==0)
                         CreateMines();
                     QuickMaffs(openrow,opencol);
-
+                    CheckWin();
+                    break;
+            case 2:
+                    printf("Please enter the order of the cell you want to open\nRows first, columns second (ex: 1 enter 4 enter)\n");
+                    scanf("%d",&markrow);
+                    scanf("%d",&markcol);
+                    MarkCell();
+                    break;
+            case 3:
+                    SaveGame();
+                    break;
+            case 4:
+                    printf("Are you sure? All unsaved changes will be lost! (Y/N)");
+                    do{
+                    scanf(" %c",&YesNo);
+                    if(YesNo!= 'Y' && YesNo!='N' && YesNo!= 'y' && YesNo!='n')
+                    printf("Please enter Y or N\n");
+                    }while(YesNo!= 'Y' && YesNo!='N' && YesNo!= 'y' && YesNo!='n');
+                    if(YesNo=='n' || YesNo== 'N')
+                        break;
+                    else if(YesNo=='y' || YesNo== 'Y')
+                        MainMenu();
+                    break;
         }
         Moves++;
     }
